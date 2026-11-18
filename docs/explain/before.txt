@@ -1,0 +1,97 @@
+                                                                                                      QUERY PLAN                                                                                                       
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Merge Left Join  (cost=4078941.83..10389794.44 rows=19460467 width=112) (actual time=3805.759..5769.829 rows=522182 loops=1)
+   Merge Cond: (c.loan_id = sched_cum.loan_id)
+   Join Filter: (((sum(COALESCE(p.paid_amount, '0'::numeric)) OVER (?)) >= (COALESCE(lag(sched_cum.cum_due) OVER (?), '0'::numeric))) AND ((sum(COALESCE(p.paid_amount, '0'::numeric)) OVER (?)) < sched_cum.cum_due))
+   Rows Removed by Join Filter: 7093584
+   Buffers: shared hit=410, temp read=27282 written=37948
+   CTE calendar
+     ->  Nested Loop  (cost=263.61..51038.73 rows=1561000 width=24) (actual time=558.681..739.826 rows=522182 loops=1)
+           Buffers: shared hit=136
+           ->  Aggregate  (cost=263.60..263.61 rows=1 width=4) (actual time=558.490..558.501 rows=1 loops=1)
+                 Buffers: shared hit=109
+                 ->  Seq Scan on int_payments_clean int_payments_clean_1  (cost=0.00..232.68 rows=12368 width=4) (actual time=0.062..1.570 rows=12368 loops=1)
+                       Buffers: shared hit=109
+           ->  Nested Loop  (cost=0.01..31262.62 rows=1561000 width=28) (actual time=0.184..120.318 rows=522182 loops=1)
+                 Buffers: shared hit=27
+                 ->  Seq Scan on int_loans_validated  (cost=0.00..42.61 rows=1561 width=20) (actual time=0.019..0.532 rows=1561 loops=1)
+                       Buffers: shared hit=27
+                 ->  Function Scan on generate_series d_1  (cost=0.01..10.01 rows=1000 width=8) (actual time=0.035..0.048 rows=335 loops=1561)
+   CTE sched_cum
+     ->  WindowAgg  (cost=2011.11..2459.91 rows=22440 width=51) (actual time=5.872..16.704 rows=22440 loops=1)
+           Buffers: shared hit=165
+           ->  Sort  (cost=2011.11..2067.21 rows=22440 width=19) (actual time=5.815..6.641 rows=22440 loops=1)
+                 Sort Key: schedule.loan_id, schedule.due_date
+                 Sort Method: quicksort  Memory: 1820kB
+                 Buffers: shared hit=165
+                 ->  Seq Scan on schedule  (cost=0.00..389.40 rows=22440 width=19) (actual time=0.051..2.859 rows=22440 loops=1)
+                       Buffers: shared hit=165
+   ->  Merge Join  (cost=4023372.68..4102300.21 rows=1561000 width=108) (actual time=3801.099..4373.865 rows=522182 loops=1)
+         Merge Cond: ((c.loan_id = d.loan_id) AND (c.snapshot_date = d.snapshot_date))
+         Buffers: shared hit=410, temp read=27282 written=37948
+         ->  WindowAgg  (cost=288274.74..327877.27 rows=1561000 width=76) (actual time=1025.666..1351.118 rows=522182 loops=1)
+               Buffers: shared hit=245, temp read=1977 written=4391
+               ->  Merge Left Join  (cost=288274.74..300559.77 rows=1561000 width=76) (actual time=1025.615..1154.229 rows=522182 loops=1)
+                     Merge Cond: ((c.loan_id = p.loan_id) AND (c.snapshot_date = p.paid_at))
+                     Buffers: shared hit=245, temp read=1977 written=4391
+                     ->  Sort  (cost=287840.38..291742.88 rows=1561000 width=44) (actual time=1011.957..1065.829 rows=522182 loops=1)
+                           Sort Key: c.loan_id, c.snapshot_date
+                           Sort Method: external merge  Disk: 15816kB
+                           Buffers: shared hit=136, temp read=1977 written=4391
+                           ->  CTE Scan on calendar c  (cost=0.00..31220.00 rows=1561000 width=44) (actual time=558.685..859.662 rows=522182 loops=1)
+                                 Buffers: shared hit=136, temp written=2405
+                     ->  Sort  (cost=434.37..438.00 rows=1452 width=44) (actual time=13.585..15.425 rows=12368 loops=1)
+                           Sort Key: p.loan_id, p.paid_at
+                           Sort Method: quicksort  Memory: 1008kB
+                           Buffers: shared hit=109
+                           ->  Subquery Scan on p  (cost=325.44..358.11 rows=1452 width=44) (actual time=6.212..9.878 rows=12368 loops=1)
+                                 Buffers: shared hit=109
+                                 ->  HashAggregate  (cost=325.44..343.59 rows=1452 width=44) (actual time=6.210..9.065 rows=12368 loops=1)
+                                       Group Key: int_payments_clean.loan_id, int_payments_clean.paid_at
+                                       Batches: 1  Memory Usage: 5009kB
+                                       Buffers: shared hit=109
+                                       ->  Seq Scan on int_payments_clean  (cost=0.00..232.68 rows=12368 width=19) (actual time=0.013..0.600 rows=12368 loops=1)
+                                             Buffers: shared hit=109
+         ->  Sort  (cost=3735097.93..3735197.93 rows=40000 width=44) (actual time=2775.301..2883.777 rows=522182 loops=1)
+               Sort Key: d.loan_id, d.snapshot_date
+               Sort Method: external merge  Disk: 18552kB
+               Buffers: shared hit=165, temp read=25305 written=33557
+               ->  Subquery Scan on d  (cost=3731240.39..3732040.39 rows=40000 width=44) (actual time=1838.747..2567.405 rows=522182 loops=1)
+                     Buffers: shared hit=165, temp read=22986 written=31228
+                     ->  HashAggregate  (cost=3731240.39..3731640.39 rows=40000 width=44) (actual time=1838.711..2532.063 rows=522182 loops=1)
+                           Group Key: c_1.loan_id, c_1.snapshot_date
+                           Batches: 21  Memory Usage: 8249kB  Disk Usage: 113472kB
+                           Buffers: shared hit=165, temp read=22986 written=31228
+                           ->  Merge Left Join  (cost=220551.39..3293379.89 rows=58381400 width=44) (actual time=141.869..1130.086 rows=3239243 loops=1)
+                                 Merge Cond: (c_1.loan_id = s.loan_id)
+                                 Join Filter: (s.due_date <= c_1.snapshot_date)
+                                 Rows Removed by Join Filter: 4334298
+                                 Buffers: shared hit=165, temp read=3819 written=1422
+                                 ->  Sort  (cost=218480.88..222383.38 rows=1561000 width=12) (actual time=117.549..156.564 rows=522182 loops=1)
+                                       Sort Key: c_1.loan_id
+                                       Sort Method: external merge  Disk: 11304kB
+                                       Buffers: temp read=3819 written=1422
+                                       ->  CTE Scan on calendar c_1  (cost=0.00..31220.00 rows=1561000 width=12) (actual time=0.024..45.057 rows=522182 loops=1)
+                                             Buffers: temp read=2406 written=1
+                                 ->  Sort  (cost=2070.51..2126.61 rows=22440 width=44) (actual time=24.247..268.480 rows=7526987 loops=1)
+                                       Sort Key: s.loan_id
+                                       Sort Method: quicksort  Memory: 1975kB
+                                       Buffers: shared hit=165
+                                       ->  CTE Scan on sched_cum s  (cost=0.00..448.80 rows=22440 width=44) (actual time=5.883..21.171 rows=22440 loops=1)
+                                             Buffers: shared hit=165
+   ->  Materialize  (cost=2070.51..2799.81 rows=22440 width=76) (actual time=4.538..263.736 rows=7526987 loops=1)
+         ->  WindowAgg  (cost=2070.51..2519.31 rows=22440 width=94) (actual time=4.529..12.792 rows=22440 loops=1)
+               ->  Sort  (cost=2070.51..2126.61 rows=22440 width=44) (actual time=4.469..5.538 rows=22440 loops=1)
+                     Sort Key: sched_cum.loan_id, sched_cum.due_date
+                     Sort Method: quicksort  Memory: 1820kB
+                     ->  CTE Scan on sched_cum  (cost=0.00..448.80 rows=22440 width=44) (actual time=0.026..2.033 rows=22440 loops=1)
+ Planning:
+   Buffers: shared hit=218
+ Planning Time: 2.540 ms
+ JIT:
+   Functions: 89
+   Options: Inlining true, Optimization true, Expressions true, Deforming true
+   Timing: Generation 10.917 ms, Inlining 80.102 ms, Optimization 278.556 ms, Emission 269.515 ms, Total 639.090 ms
+ Execution Time: 5862.190 ms
+(93 rows)
+

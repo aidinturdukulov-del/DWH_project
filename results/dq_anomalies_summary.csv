@@ -1,0 +1,8 @@
+anomaly_code,severity,source_table,rows,amount
+payment_before_issue,excluded,payments,4,20000.00
+payment_duplicate,excluded,payments,12,316641.50
+payment_non_positive,excluded,payments,3,-27000.00
+payment_orphan,excluded,payments,5,37302.00
+loan_on_rejected_application,flagged,loans,3,400000.00
+application_stuck_new,info,applications,268,46970000.00
+payment_late_arrival,info,payments,193,2738906.35

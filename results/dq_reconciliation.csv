@@ -1,0 +1,11 @@
+check_name,description,expected,actual,diff,passed
+core_schedule_amount,Сумма графиков в core = sum(due_amount) в raw.schedule,318080339.52,318080339.52,0.00,t
+funnel_applications_count,Заявок в воронке = заявок в raw.applications,3200,3200,0,t
+funnel_issued_amount,Сумма выдач в воронке = sum(principal) в raw.loans,272105000.00,272105000.00,0.00,t
+funnel_loans_count,Выдач в воронке = строк в raw.loans,1561,1561,0,t
+payments_amount_balance,Сумма платежей в raw = очищенные + исключённые (dq),187701401.69,187701401.69,0.00,t
+payments_count_balance,Платежей в raw = очищенные + исключённые (dq),12392,12392,0,t
+portfolio_view_balance,Остаток в v_portfolio_on_date = сумма остатков снимка на as_of,130725881.33,130725881.33,0.00,t
+snapshot_loans_on_as_of,Кредитов в снимке на as_of = строк в raw.loans,1561,1561,0,t
+snapshot_repaid_vs_payments,Погашено по снимку на as_of (график - остаток) = сумма очищенных платежей,187354458.19,187354458.19,0.00,t
+snapshot_row_count,Строк в снимке = сумма (as_of - issued_at + 1) по кредитам,522182,522182,0,t

@@ -1,0 +1,43 @@
+name: credit_dwh
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: credit_dwh_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-credit_dwh}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "${POSTGRES_PORT:-5434}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./credit_dwh_test_data:/data:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ${POSTGRES_DB:-credit_dwh}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  dbt:
+    build: .
+    container_name: credit_dwh_dbt
+    working_dir: /workspace/dbt_project
+    volumes:
+      - .:/workspace
+    environment:
+      DBT_PROFILES_DIR: /workspace/dbt_project
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_NAME: ${POSTGRES_DB:-credit_dwh}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    tty: true
+    stdin_open: true
+
+volumes:
+  pgdata:

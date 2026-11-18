@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: dm_application_funnel
+    description: "Воронка заявок по месяцу создания заявки"
+    columns:
+      - name: application_month
+        data_tests: [unique, not_null]
+
+  - name: dm_loan_snapshot_daily
+    description: "Ежедневные снимки кредитов (таблица dm.loan_snapshot_daily)"
+    data_tests:
+      - dbt_utils_free_unique_combination:
+          arguments:
+            columns: [snapshot_date, loan_id]
+    columns:
+      - name: overdue_bucket
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['0', '1-30', '31-60', '61-90', '90+']
+
+  - name: v_portfolio_on_date
+    columns:
+      - name: snapshot_date
+        data_tests: [unique, not_null]

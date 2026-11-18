@@ -1,0 +1,68 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: "Сырые данные из источника (CSV файлы)"
+    tables:
+      - name: applications
+        description: "Заявки на получение кредита"
+        columns:
+          - name: app_id
+            description: "Идентификатор заявки"
+            data_tests:
+              - not_null
+              - unique
+          - name: client_id
+            description: "Идентификатор клиента"
+          - name: created_at
+            description: "Дата и время создания заявки"
+          - name: amount
+            description: "Запрошенная сумма"
+          - name: status
+            description: "Статус заявки (new / approved / rejected)"
+          - name: decided_at
+            description: "Дата и время решения"
+
+      - name: loans
+        description: "Фактически выданные кредиты"
+        columns:
+          - name: loan_id
+            description: "Идентификатор выданного кредита"
+            data_tests:
+              - not_null
+              - unique
+          - name: app_id
+            description: "Ссылка на заявку"
+          - name: issued_at
+            description: "Дата выдачи кредита"
+          - name: principal
+            description: "Сумма кредита"
+          - name: term_months
+            description: "Срок кредита в месяцах"
+          - name: rate
+            description: "Годовая процентная ставка"
+
+      - name: schedule
+        description: "График плановых платежей"
+        columns:
+          - name: loan_id
+            description: "Идентификатор кредита"
+          - name: due_date
+            description: "Плановая дата платежа"
+          - name: due_amount
+            description: "Плановая сумма платежа"
+
+      - name: payments
+        description: "Фактические платежи клиентов"
+        columns:
+          - name: payment_id
+            description: "Идентификатор платежа"
+          - name: loan_id
+            description: "Идентификатор кредита"
+          - name: paid_at
+            description: "Дата фактического платежа"
+          - name: amount
+            description: "Сумма платежа"
+          - name: loaded_at
+            description: "Дата появления записи в источнике"

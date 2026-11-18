@@ -1,0 +1,88 @@
+                                                                                     QUERY PLAN                                                                                      
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Nested Loop  (cost=1624.32..1105089.38 rows=9460000 width=128) (actual time=35.327..797.613 rows=522182 loops=1)
+   Buffers: shared hit=78819, temp read=78 written=145
+   CTE as_of
+     ->  Aggregate  (cost=294.52..294.53 rows=1 width=12) (actual time=1.527..1.531 rows=1 loops=1)
+           Buffers: shared hit=109
+           ->  Seq Scan on int_payments_clean int_payments_clean_1  (cost=0.00..232.68 rows=12368 width=12) (actual time=0.005..0.649 rows=12368 loops=1)
+                 Buffers: shared hit=109
+   CTE recalc
+     ->  Seq Scan on int_loans_validated  (cost=0.00..42.61 rows=1561 width=24) (actual time=0.032..0.258 rows=1561 loops=1)
+           Buffers: shared hit=27
+   InitPlan 3 (returns $2)
+     ->  CTE Scan on as_of  (cost=0.00..0.02 rows=1 width=4) (actual time=0.000..0.000 rows=1 loops=1)
+   InitPlan 4 (returns $3)
+     ->  CTE Scan on as_of as_of_1  (cost=0.00..0.02 rows=1 width=4) (actual time=0.000..0.001 rows=1 loops=1)
+   ->  Hash Join  (cost=1287.13..40502.19 rows=9460 width=132) (actual time=35.298..412.218 rows=25325 loops=1)
+         Hash Cond: ("*SELECT* 1".loan_id = r.loan_id)
+         Buffers: shared hit=78819, temp read=78 written=145
+         ->  Nested Loop Left Join  (cost=1236.40..40117.48 rows=1212 width=92) (actual time=34.486..406.839 rows=25325 loops=1)
+               Buffers: shared hit=78792, temp read=78 written=145
+               ->  Nested Loop  (cost=1204.38..1289.23 rows=1212 width=88) (actual time=34.411..68.066 rows=25325 loops=1)
+                     Buffers: shared hit=389, temp read=78 written=145
+                     ->  WindowAgg  (cost=1204.38..1252.86 rows=1212 width=80) (actual time=34.408..60.912 rows=25325 loops=1)
+                           Buffers: shared hit=389, temp read=78 written=145
+                           ->  WindowAgg  (cost=1204.38..1228.62 rows=1212 width=80) (actual time=34.399..45.584 rows=25325 loops=1)
+                                 Buffers: shared hit=389, temp read=78 written=145
+                                 ->  Sort  (cost=1204.38..1207.41 rows=1212 width=76) (actual time=34.384..36.455 rows=25325 loops=1)
+                                       Sort Key: "*SELECT* 1".loan_id, "*SELECT* 1".event_date
+                                       Sort Method: quicksort  Memory: 1971kB
+                                       Buffers: shared hit=389, temp read=78 written=145
+                                       ->  HashAggregate  (cost=1124.12..1142.30 rows=1212 width=76) (actual time=18.191..28.455 rows=25325 loops=1)
+                                             Group Key: "*SELECT* 1".loan_id, "*SELECT* 1".event_date
+                                             Batches: 5  Memory Usage: 8369kB  Disk Usage: 728kB
+                                             Buffers: shared hit=383, temp read=78 written=145
+                                             InitPlan 5 (returns $4)
+                                               ->  CTE Scan on as_of as_of_2  (cost=0.00..0.02 rows=1 width=4) (actual time=1.529..1.530 rows=1 loops=1)
+                                                     Buffers: shared hit=109
+                                             ->  Append  (cost=0.00..1002.88 rows=12123 width=76) (actual time=1.536..10.279 rows=27301 loops=1)
+                                                   Buffers: shared hit=383
+                                                   ->  Result  (cost=0.00..627.12 rows=8000 width=76) (actual time=1.535..6.670 rows=14933 loops=1)
+                                                         Buffers: shared hit=274
+                                                         ->  Append  (cost=0.00..527.12 rows=8000 width=48) (actual time=1.534..5.158 rows=14933 loops=1)
+                                                               Buffers: shared hit=274
+                                                               ->  Subquery Scan on "*SELECT* 1"  (cost=0.00..41.62 rows=520 width=48) (actual time=1.534..1.870 rows=1561 loops=1)
+                                                                     Buffers: shared hit=109
+                                                                     ->  CTE Scan on recalc  (cost=0.00..35.12 rows=520 width=20) (actual time=1.533..1.695 rows=1561 loops=1)
+                                                                           Filter: (issued_at <= $4)
+                                                                           Buffers: shared hit=109
+                                                               ->  Subquery Scan on s  (cost=0.00..445.50 rows=7480 width=23) (actual time=0.004..2.424 rows=13372 loops=1)
+                                                                     Buffers: shared hit=165
+                                                                     ->  Seq Scan on schedule  (cost=0.00..445.50 rows=7480 width=19) (actual time=0.004..1.463 rows=13372 loops=1)
+                                                                           Filter: (due_date <= $4)
+                                                                           Rows Removed by Filter: 9068
+                                                                           Buffers: shared hit=165
+                                                   ->  Subquery Scan on "*SELECT* 3"  (cost=0.00..315.14 rows=4123 width=51) (actual time=0.006..2.032 rows=12368 loops=1)
+                                                         Buffers: shared hit=109
+                                                         ->  Seq Scan on int_payments_clean  (cost=0.00..263.60 rows=4123 width=23) (actual time=0.005..0.970 rows=12368 loops=1)
+                                                               Filter: (paid_at <= $4)
+                                                               Buffers: shared hit=109
+                     ->  CTE Scan on as_of a  (cost=0.00..0.02 rows=1 width=8) (actual time=0.000..0.000 rows=1 loops=25325)
+               ->  Aggregate  (cost=32.02..32.03 rows=1 width=4) (actual time=0.013..0.013 rows=1 loops=25325)
+                     Buffers: shared hit=78403
+                     ->  Subquery Scan on s_1  (cost=31.55..32.00 rows=5 width=4) (actual time=0.008..0.012 rows=10 loops=25325)
+                           Filter: (s_1.cum_due > (sum((sum((((0))::numeric)))) OVER (?)))
+                           Rows Removed by Filter: 6
+                           Buffers: shared hit=78403
+                           ->  WindowAgg  (cost=31.55..31.83 rows=14 width=44) (actual time=0.005..0.011 rows=16 loops=25325)
+                                 Buffers: shared hit=78403
+                                 ->  Sort  (cost=31.55..31.58 rows=14 width=19) (actual time=0.004..0.004 rows=16 loops=25325)
+                                       Sort Key: schedule_1.due_date
+                                       Sort Method: quicksort  Memory: 26kB
+                                       Buffers: shared hit=78403
+                                       ->  Index Scan using schedule_pkey on schedule schedule_1  (cost=0.29..31.28 rows=14 width=19) (actual time=0.001..0.002 rows=16 loops=25325)
+                                             Index Cond: (loan_id = "*SELECT* 1".loan_id)
+                                             Buffers: shared hit=78403
+         ->  Hash  (cost=31.22..31.22 rows=1561 width=48) (actual time=0.804..0.805 rows=1561 loops=1)
+               Buckets: 2048  Batches: 1  Memory Usage: 108kB
+               Buffers: shared hit=27
+               ->  CTE Scan on recalc r  (cost=0.00..31.22 rows=1561 width=48) (actual time=0.035..0.596 rows=1561 loops=1)
+                     Buffers: shared hit=27
+   ->  Function Scan on generate_series d  (cost=0.02..10.02 rows=1000 width=8) (actual time=0.004..0.005 rows=21 loops=25325)
+ Planning:
+   Buffers: shared hit=225
+ Planning Time: 1.345 ms
+ Execution Time: 813.854 ms
+(84 rows)
+

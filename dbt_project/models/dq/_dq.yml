@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: dq_source_anomalies
+    description: "Реестр ошибок и аномалий источника (строка на запись)"
+  - name: dq_reconciliation
+    description: "Сверка витрин с исходными таблицами"
+    columns:
+      - name: passed
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [true]
+                quote: false

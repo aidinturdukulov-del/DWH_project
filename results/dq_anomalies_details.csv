@@ -1,0 +1,28 @@
+anomaly_code,severity,source_table,record_id,amount,details
+loan_on_rejected_application,flagged,loans,10411,150000.00,"app_id=100852 в статусе rejected, решение 2025-06-28 02:22:00"
+loan_on_rejected_application,flagged,loans,10448,150000.00,"app_id=100900 в статусе rejected, решение 2025-07-11 03:23:00"
+loan_on_rejected_application,flagged,loans,10464,100000.00,"app_id=100941 в статусе rejected, решение 2025-07-17 12:08:00"
+payment_before_issue,excluded,payments,500001,5000.00,paid_at=2024-12-18 раньше issued_at=2025-01-08 (loan_id=10004)
+payment_before_issue,excluded,payments,503248,5000.00,paid_at=2025-11-19 раньше issued_at=2025-12-12 (loan_id=10798)
+payment_before_issue,excluded,payments,507356,5000.00,paid_at=2026-05-07 раньше issued_at=2026-05-21 (loan_id=11175)
+payment_before_issue,excluded,payments,508624,5000.00,paid_at=2026-06-22 раньше issued_at=2026-07-04 (loan_id=11277)
+payment_duplicate,excluded,payments,500230,9455.96,"дубль payment_id=500228 (loan_id, paid_at, amount, loaded_at совпадают)"
+payment_duplicate,excluded,payments,500373,5287.11,"дубль payment_id=500368 (loan_id, paid_at, amount, loaded_at совпадают)"
+payment_duplicate,excluded,payments,501097,90774.99,"дубль payment_id=501096 (loan_id, paid_at, amount, loaded_at совпадают)"
+payment_duplicate,excluded,payments,501573,36309.99,"дубль payment_id=501560 (loan_id, paid_at, amount, loaded_at совпадают)"
+payment_duplicate,excluded,payments,501743,14771.03,"дубль payment_id=501737 (loan_id, paid_at, amount, loaded_at совпадают)"
+payment_duplicate,excluded,payments,501891,20305.05,"дубль payment_id=501885 (loan_id, paid_at, amount, loaded_at совпадают)"
+payment_duplicate,excluded,payments,502572,8776.26,"дубль payment_id=502561 (loan_id, paid_at, amount, loaded_at совпадают)"
+payment_duplicate,excluded,payments,503245,36309.99,"дубль payment_id=503228 (loan_id, paid_at, amount, loaded_at совпадают)"
+payment_duplicate,excluded,payments,505444,48252.99,"дубль payment_id=505437 (loan_id, paid_at, amount, loaded_at совпадают)"
+payment_duplicate,excluded,payments,506653,14623.07,"дубль payment_id=506632 (loan_id, paid_at, amount, loaded_at совпадают)"
+payment_duplicate,excluded,payments,509310,27504.00,"дубль payment_id=509309 (loan_id, paid_at, amount, loaded_at совпадают)"
+payment_duplicate,excluded,payments,510873,4271.06,"дубль payment_id=510871 (loan_id, paid_at, amount, loaded_at совпадают)"
+payment_non_positive,excluded,payments,504527,-12000.00,"amount=-12000.00 (loan_id=10754, paid_at=2026-01-16)"
+payment_non_positive,excluded,payments,507364,-7500.00,"amount=-7500.00 (loan_id=10982, paid_at=2026-05-07)"
+payment_non_positive,excluded,payments,509884,-7500.00,"amount=-7500.00 (loan_id=11205, paid_at=2026-08-06)"
+payment_orphan,excluded,payments,504305,8200.50,loan_id=990002 отсутствует в loans
+payment_orphan,excluded,payments,504732,8200.50,loan_id=990004 отсутствует в loans
+payment_orphan,excluded,payments,505776,8200.50,loan_id=990005 отсутствует в loans
+payment_orphan,excluded,payments,508502,4500.00,loan_id=990003 отсутствует в loans
+payment_orphan,excluded,payments,508568,8200.50,loan_id=990001 отсутствует в loans

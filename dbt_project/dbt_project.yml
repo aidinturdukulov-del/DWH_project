@@ -1,0 +1,31 @@
+name: 'credit_dwh'
+version: '1.0.0'
+config-version: 2
+
+profile: 'credit_dwh'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  credit_dwh:
+    staging:
+      +schema: staging
+      +materialized: view
+    intermediate:
+      +schema: core
+      +materialized: table
+    marts:
+      +schema: dm
+      +materialized: table
+    dq:
+      +schema: dq
+      +materialized: table
